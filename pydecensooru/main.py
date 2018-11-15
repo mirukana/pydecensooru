@@ -20,17 +20,21 @@ REPO_URL: str = "git://github.com/friendlyanon/decensooru"
 
 def decensor_iter(posts_info: Iterable[dict], subdomain: str = "danbooru"
                  ) -> Generator[dict, None, None]:
+    """Apply decensoring on an iterable of posts info dicts from Danbooru API.
+    Any censored post is automatically decensored if needed."""
     for info in posts_info:
         yield decensor(info, subdomain)
 
 
 def decensor(post_info: dict, subdomain: str = "danbooru") -> dict:
+    "Decensor a post info dict from Danbooru API if needed."
     return post_info \
            if "md5" in post_info else fill_missing_info(post_info, subdomain)
 
 
 
 def fill_missing_info(info: dict, subdomain: str = "danbooru") -> dict:
+    "Add missing info in a censored post info dict."
     try:
         md5, ext = find_censored_md5ext(info["id"])
     except TypeError:  # None returned by find_..
@@ -62,14 +66,15 @@ def fill_missing_info(info: dict, subdomain: str = "danbooru") -> dict:
     }}
 
 
-class DummyFile():
+class _DummyFile():
     @staticmethod
     def write(*args, **kwargs):
         pass
-DUMMY_FILE = DummyFile()
+_DUMMY_FILE = _DummyFile()
 
 
 def find_censored_md5ext(post_id: int) -> Optional[str]:
+    "Find MD5 for a censored post's ID, return None if can't find."
     DATA_DIR.mkdir(exist_ok=True, parents=True)
 
     if REPO_DIR.exists():
@@ -82,10 +87,10 @@ def find_censored_md5ext(post_id: int) -> Optional[str]:
         date = f"{date.year}{date.month}{date.day}"
 
         if last_pull_date != date:
-            git.pull(str(REPO_DIR), REPO_URL, errstream=DUMMY_FILE)
+            git.pull(str(REPO_DIR), REPO_URL, errstream=_DUMMY_FILE)
             LAST_PULL_DATE_FILE.write_text(date)
     else:
-        git.clone(REPO_URL, target=str(REPO_DIR), errstream=DUMMY_FILE)
+        git.clone(REPO_URL, target=str(REPO_DIR), errstream=_DUMMY_FILE)
         date = datetime.utcnow()
         LAST_PULL_DATE_FILE.write_text(f"{date.year}{date.month}{date.day}")
 
