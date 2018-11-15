@@ -1,7 +1,7 @@
 # Copyright 2018 miruka
-# This file is part of decensooru, licensed under LGPLv3.
+# This file is part of pydecensooru, licensed under LGPLv3.
 
-PKG_DIR = decensooru
+PKG_DIR = pydecensooru
 
 PYTHON = python3
 PIP    = pip3

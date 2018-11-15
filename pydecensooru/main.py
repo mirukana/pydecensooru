@@ -1,5 +1,5 @@
 # Copyright 2018 miruka
-# This file is part of decensooru, licensed under LGPLv3.
+# This file is part of pydecensooru, licensed under LGPLv3.
 
 from datetime import datetime
 from pathlib import Path

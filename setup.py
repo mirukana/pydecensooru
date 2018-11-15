@@ -1,9 +1,9 @@
 # Copyright 2018 miruka
-# This file is part of decensooru, licensed under LGPLv3.
+# This file is part of pydecensooru, licensed under LGPLv3.
 
 from setuptools import setup, find_packages
 
-from decensooru import __about__
+from pydecensooru import __about__
 
 
 def get_readme():
@@ -35,7 +35,7 @@ setup(
 
     keywords = "better booru danbooru gold member bypass decensooru " \
                "uncensor banned artist lunakit lunafind",
-    url      = "https://github.com/mirukan/decensooru",
+    url      = "https://github.com/mirukan/pydecensooru",
 
     classifiers=[
         "Development Status :: 3 - Alpha",
