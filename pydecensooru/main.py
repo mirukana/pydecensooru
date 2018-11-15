@@ -17,23 +17,25 @@ LAST_PULL_DATE_FILE: Path = DATA_DIR / "last_pull_date"
 
 REPO_URL: str = "git://github.com/friendlyanon/decensooru"
 
+DEFAULT_SITE: str = "https://danbooru.donmai.us"
 
-def decensor_iter(posts_info: Iterable[dict], subdomain: str = "danbooru"
+
+def decensor_iter(posts_info: Iterable[dict], site_url: str = DEFAULT_SITE
                  ) -> Generator[dict, None, None]:
     """Apply decensoring on an iterable of posts info dicts from Danbooru API.
     Any censored post is automatically decensored if needed."""
     for info in posts_info:
-        yield decensor(info, subdomain)
+        yield decensor(info, site_url)
 
 
-def decensor(post_info: dict, subdomain: str = "danbooru") -> dict:
+def decensor(post_info: dict, site_url: str = DEFAULT_SITE) -> dict:
     "Decensor a post info dict from Danbooru API if needed."
     return post_info \
-           if "md5" in post_info else fill_missing_info(post_info, subdomain)
+           if "md5" in post_info else fill_missing_info(post_info, site_url)
 
 
 
-def fill_missing_info(info: dict, subdomain: str = "danbooru") -> dict:
+def fill_missing_info(info: dict, site_url: str = DEFAULT_SITE) -> dict:
     "Add missing info in a censored post info dict."
     try:
         md5, ext = find_censored_md5ext(info["id"])
@@ -43,9 +45,9 @@ def fill_missing_info(info: dict, subdomain: str = "danbooru") -> dict:
     sample_ext = "jpg" if ext != "zip" else "webm"
 
     if info["id"] > 2_800_000:
-        url_base   = f"https://{subdomain}.donmai.us"
-        file_url   = f"{url_base}/data/{md5}.{ext}"
-        sample_url = f"{url_base}/data/sample/sample-{md5}.{sample_ext}"
+        site_url   = site_url.rstrip("/")
+        file_url   = f"{site_url}/data/{md5}.{ext}"
+        sample_url = f"{site_url}/data/sample/sample-{md5}.{sample_ext}"
     else:
         server     = "raikou2" if info["id"] > 850_000 else "raikou1"
         url_base   = f"https://{server}.donmai.us"
