@@ -10,7 +10,9 @@
 A Python module using [Decensooru](https://github.com/friendlyanon/decensooru)
 data to automatically fill any Danbooru post's missing info keys.
 
-The Decensooru repo will be silently cloned and kept up-to-date in your user
+The Decensooru `id:md5.ext`
+[batches](https://github.com/friendlyanon/decensooru/tree/master/batches)
+will be silently fetched and kept up-to-date in your user
 data directory,  
 e.g. *~/.local/share/pydecensooru* on GNU/Linux by default.
 

@@ -12,8 +12,8 @@ def get_readme():
 
 
 setup(
-    name        = __about__.__pkg_name__,
-    version     = __about__.__version__,
+    name    = __about__.__pkg_name__,
+    version = __about__.__version__,
 
     author       = __about__.__author__,
     author_email = __about__.__email__,
@@ -26,12 +26,12 @@ setup(
     python_requires  = ">=3.6, <4",
     install_requires = [
         "appdirs",
-        "dulwich>=0.19.7",
+        "atomicfile",
+        "requests",
     ],
 
     include_package_data = True,
     packages             = find_packages(),
-    # package_data         = {__about__.__pkg_name__: ["*.yaml"]},
 
     keywords = "better booru danbooru gold member bypass decensooru " \
                "uncensor banned artist lunakit lunafind",

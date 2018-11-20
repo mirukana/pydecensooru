@@ -4,7 +4,7 @@
 "Danbooru post decensoring for Python"
 
 __pkg_name__ = "pydecensooru"
-__version__  = "0.1.0"
+__version__  = "0.2.0"
 __status__   = "Development"
 # __status__ = "Production"
 

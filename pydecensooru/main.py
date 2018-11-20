@@ -1,23 +1,26 @@
 # Copyright 2018 miruka
 # This file is part of pydecensooru, licensed under LGPLv3.
 
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Generator, Iterable, Optional
 
 import appdirs
-import dulwich.porcelain as git
+from atomicfile import AtomicFile
+
+import requests
 
 from . import __about__
 
 DATA_DIR:            Path = Path(appdirs.user_data_dir(__about__.__pkg_name__))
-REPO_DIR:            Path = DATA_DIR / "repository"
-BATCHES_DIR:         Path = REPO_DIR / "batches"
+BATCHES_DIR:         Path = DATA_DIR / "batches"
 LAST_PULL_DATE_FILE: Path = DATA_DIR / "last_pull_date"
 
-REPO_URL: str = "git://github.com/friendlyanon/decensooru"
-
 DEFAULT_SITE: str = "https://danbooru.donmai.us"
+
+BATCHES_API_URL: str = ("https://api.github.com/repos/friendlyanon/decensooru/"
+                        "contents/batches?ref=master")
 
 
 def decensor_iter(posts_info: Iterable[dict], site_url: str = DEFAULT_SITE
@@ -77,24 +80,18 @@ _DUMMY_FILE = _DummyFile()
 
 def find_censored_md5ext(post_id: int) -> Optional[str]:
     "Find MD5 for a censored post's ID, return None if can't find."
-    DATA_DIR.mkdir(exist_ok=True, parents=True)
+    try:
+        last_pull_date = LAST_PULL_DATE_FILE.read_text().strip()
+    except FileNotFoundError:
+        last_pull_date = ""
 
-    if REPO_DIR.exists():
-        try:
-            last_pull_date = LAST_PULL_DATE_FILE.read_text().strip()
-        except FileNotFoundError:
-            last_pull_date = ""
+    date = datetime.utcnow()
+    date = f"{date.year}{date.month}{date.day}"
 
-        date = datetime.utcnow()
-        date = f"{date.year}{date.month}{date.day}"
-
-        if last_pull_date != date:
-            git.pull(str(REPO_DIR), REPO_URL, errstream=_DUMMY_FILE)
-            LAST_PULL_DATE_FILE.write_text(date)
-    else:
-        git.clone(REPO_URL, target=str(REPO_DIR), errstream=_DUMMY_FILE)
-        date = datetime.utcnow()
-        LAST_PULL_DATE_FILE.write_text(f"{date.year}{date.month}{date.day}")
+    if last_pull_date != date:
+        update_batches()
+        LAST_PULL_DATE_FILE.parent.mkdir(exist_ok=True, parents=True)
+        LAST_PULL_DATE_FILE.write_text(date)
 
     # Faster than converting every ID in files to int
     post_id = str(post_id)
@@ -108,3 +105,30 @@ def find_censored_md5ext(post_id: int) -> Optional[str]:
                     return its_md5_ext.rstrip().split(".")
 
     return None
+
+
+def update_batches() -> None:
+    "Update id:md5.ext batches from Dencensooru's repository."
+    batches_data  = requests.get(BATCHES_API_URL).json()
+    batches_url   = {i["name"]: i["download_url"] for i in batches_data
+                     if i["type"] == "file"}
+    order_batches = sorted(batches_url, key=int)
+
+    try:
+        existing = set(os.listdir(BATCHES_DIR))
+    except FileNotFoundError:
+        BATCHES_DIR.mkdir(parents=True)
+        existing = set()
+
+    for name in order_batches:
+        if name in existing and name != order_batches[-1]:
+            continue
+
+        answer = requests.get(batches_url[name])
+        try:
+            answer.raise_for_status()
+        except requests.RequestException:
+            continue
+
+        with AtomicFile(BATCHES_DIR / name, "w") as file:
+            file.write(answer.text)
