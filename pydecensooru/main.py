@@ -3,6 +3,7 @@
 
 import os
 from datetime import datetime
+from multiprocessing.pool import ThreadPool
 from pathlib import Path
 from typing import Generator, Iterable, Optional
 
@@ -120,15 +121,17 @@ def update_batches() -> None:
         BATCHES_DIR.mkdir(parents=True)
         existing = set()
 
-    for name in order_batches:
+    def get_batch(name: str) -> None:
         if name in existing and name != order_batches[-1]:
-            continue
+            return
 
         answer = requests.get(batches_url[name])
         try:
             answer.raise_for_status()
         except requests.RequestException:
-            continue
+            return
 
         with AtomicFile(BATCHES_DIR / name, "w") as file:
             file.write(answer.text)
+
+    ThreadPool(8).map(get_batch, order_batches)
