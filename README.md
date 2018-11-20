@@ -1,5 +1,12 @@
 # pydecensooru
 
+[![PyPI downloads](http://pepy.tech/badge/pydecensooru)](
+    http://pepy.tech/project/pydecensooru)
+[![PyPI version](https://img.shields.io/pypi/v/pydecensooru.svg)](
+    https://pypi.org/projects/pydecensooru)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/pydecensooru.svg)](
+    https://pypi.python.org/pypi/pydecensooru)
+
 A Python module using [Decensooru](https://github.com/friendlyanon/decensooru)
 data to automatically fill any Danbooru post's missing info keys.
 
